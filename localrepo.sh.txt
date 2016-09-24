@@ -1,0 +1,3 @@
+#!/bin/sh
+#this shell is created for createa local repo after mounted a cdrom
+#liu.hongbin@h3c.com
