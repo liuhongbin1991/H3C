@@ -14,24 +14,20 @@ mount /dev/cdrom /mnt/cdrom >/dev/null 2>&1;
 localpath=/mnt/cdrom
 #判断是否安装了createrepo的RPM包
 if [ `rpm -qa | grep createrepo |wc -l` = 0 ];then
-	rpm -ivh $localpath/Packages/deltarpm-3.6-3.el7.x86_64.rpm;
-	rpm -ivh $localpath/Packages/python-deltarpm-3.6-3.el7.x86_64.rpm;
-	rpm -ivh $localpath/Packages/createrepo-0.9.9-23.el7.noarch.rpm;
-    else 
-	echo haha ;
+        rpm -ivh $localpath/Packages/deltarpm-3.6-3.el7.x86_64.rpm;
+        rpm -ivh $localpath/Packages/python-deltarpm-3.6-3.el7.x86_64.rpm;
+        rpm -ivh $localpath/Packages/createrepo-0.9.9-23.el7.noarch.rpm;
 fi;
 #创建cdrom.repo文件
 if [ ! -a /etc/yum.repos.d/cdrom.repo ] ;then
-	touch /etc/yum.repos.d/cdrom.repo
+        touch /etc/yum.repos.d/cdrom.repo
 fi;
-if [ `cat /etc/yum.repos.d/cdrom.repo |wc -l` = 4]
-then
-	echo hahaha
-else
-	echo [cdrom] >>/etc/yum.repos.d/cdrom.repo
-	echo name=CentOS7 - cdrom >> /etc/yum.repos.d/cdrom.repo
-	echo baseurl=file:///mnt/cdrom/ >> /etc/yum.repos.d/cdrom.repo
-	echo enable=1 >> /etc/yum.repos.d/cdrom.repo
+if [ `cat /etc/yum.repos.d/cdrom.repo |wc -l` ! = 4 ];then
+        > /etc/yum.repos.d/cdrom.repo
+        echo [cdrom] >>/etc/yum.repos.d/cdrom.repo
+        echo name=CentOS7 - cdrom >> /etc/yum.repos.d/cdrom.repo
+        echo baseurl=file:///mnt/cdrom/ >> /etc/yum.repos.d/cdrom.repo
+        echo enable=1 >> /etc/yum.repos.d/cdrom.repo
 fi
-yum clean all;
-#check repo文件
+yum clean all >/dev/null 2>&1;
+echo "you can use the yum like 'yum --disablerepo=* --enablerepo=cdrom list'"
