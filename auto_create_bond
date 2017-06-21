@@ -1,15 +1,19 @@
 #!/bin/bash
-#by liu.hongbin@h3c.com
+#***************************************************** 
+#ScriptName:auto_create_bond.sh 
+#Author:liu.hongbin@h3c.com  
+#Create Date:2016-10-09 17:28 
+#Fuction:this shell is used to auto create a bond port
 
 #修改系统语言包，将zh_CN.UTF-8 改成 zh_CN.GB18030
-#输入命令：如vi  /etc/sysconfig/i18n （注意改好之后必须重启一下系统才行）
+输入命令：如vi  /etc/sysconfig/i18n （注意改好之后必须重启一下系统才行）
 sed -i -e 's/^/#/g' -e 1i\LANG="zh_CN.GB18030" /etc/sysconfig/i18n
 source /etc/sysconfig/i18n
-echo "##########################################################"
-echo "注意：如果在输入的过程中输错，请按ctrl+backspace键删除。"
-echo "##########################################################"
+echo "####################################################################"
+echo "!!!IF Somethings You Input Wrong  Press ‘ctrl+backspace’ to Delete。!!!"
+echo "####################################################################"
 
-bond_explain () {
+def_bond () {
    echo "#########################################################################"
    echo "
     mode=0表示load balancing (round-robin)为负载均衡方式，两块网卡都工作。
@@ -26,8 +30,8 @@ bond_explain () {
     read -p "请输入你要设置的netmask(255.255.255.0)：" NETMASK
     read -p " 请输入你要设置的gateway(192.168.0.1)：" GATEWAY
 }
-bond_explain
-network_explain () {
+def_bond
+def_network () {
     echo "###############################################"
     echo "您现阶段可以用的网卡，如下："
 #   echo `ifconfig -a | grep   -i  link | awk  '{print $1}' `
@@ -92,7 +96,7 @@ echo "##### for bond configure ######" >> /etc/modprobe.d/bond.conf
 echo "alias ${BOND} bonding" >> /etc/modprobe.d/bond.conf
 echo "options ${BOND} miimon=100 ${MODE}" >> /etc/modprobe.d/bond.conf
 }
-network_explain
+def_network
 echo "全部配置完成，等待重启网卡中。(ok)"
 sleep 3
 service network restart   
