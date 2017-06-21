@@ -1,0 +1,98 @@
+#!/bin/bash
+#by liu.hongbin@h3c.com
+
+#修改系统语言包，将zh_CN.UTF-8 改成 zh_CN.GB18030
+#输入命令：如vi  /etc/sysconfig/i18n （注意改好之后必须重启一下系统才行）
+sed -i -e 's/^/#/g' -e 1i\LANG="zh_CN.GB18030" /etc/sysconfig/i18n
+source /etc/sysconfig/i18n
+echo "##########################################################"
+echo "注意：如果在输入的过程中输错，请按ctrl+backspace键删除。"
+echo "##########################################################"
+
+bond_explain () {
+   echo "#########################################################################"
+   echo "
+    mode=0表示load balancing (round-robin)为负载均衡方式，两块网卡都工作。
+    mode=1表示fault-tolerance (active-backup)提供冗余功能，工作方式是主备的工作方式,也就是说默认情况下只有一块网卡工作,另一块做备份.
+    mode=2表示balance-x，提供负载均衡和冗余功能。
+    mode=3表示broadcast，这个模式提供容错性。
+    mode=4表示802.3ad，提供了ethtool的迅速，以及使用了802.3ad模式
+    mode=5表示balance-tlb，自动适应负载均衡，自动切换故障。在此基础上Ethtool支持驱动。
+    mode=6表示在5模式的基础上优化了arp的广播信息。"
+    echo "###########################################################################"
+    read -p "请你输入一种你要的聚合方式(mode=1)：" MODE 
+    read -p "请问你要创建聚合的名称(bond0):" BOND
+    read -p "请输入你要设置的ip(192.168.0.10)：" IP
+    read -p "请输入你要设置的netmask(255.255.255.0)：" NETMASK
+    read -p " 请输入你要设置的gateway(192.168.0.1)：" GATEWAY
+}
+bond_explain
+network_explain () {
+    echo "###############################################"
+    echo "您现阶段可以用的网卡，如下："
+#   echo `ifconfig -a | grep   -i  link | awk  '{print $1}' `
+    echo `ifconfig -a | grep   -i  "Link encap" | awk '{print $1}' `
+    echo "################################################"
+    read -p   "麻烦你选择你要的网卡做聚合(eth0 eth1)："  NIC
+    echo $NIC >> .tmp.txt
+    NIC_num=`awk '{print NF }' .tmp.txt`
+
+   for i in `seq $NIC_num`
+    do
+        NIC_true=`awk -v  a=$i '{ print $a }' .tmp.txt`
+        DIR_NIC=/etc/sysconfig/network-scripts
+        if [ $NIC_true == $NIC_true ];then
+        cp $DIR_NIC/ifcfg-$NIC_true  $DIR_NIC/ifcfg-$NIC_true.bak
+#       cat /dev/null > $DIR_NIC/ifcfg-$NIC_true
+
+#       cat >> $DIR_NIC/ifcfg-$NIC_true <<EOF
+#           BOOTPROTO=none
+#           TYPE=Ethernet
+#           DEVICE=$NIC_true
+#           ONBOOT=yes
+#           MASTER=$BOND
+#           SLAVE=yes
+#EOF
+####    或者
+    echo "DEVICE=$NIC_true
+            MASTER=$BOND
+            SLAVE=yes" >> $DIR_NIC/ifcfg-$NIC_true
+#           
+    sed -i -e "/^ONBOOT/"d -e /^DEVICE/a\ONBOOT=yes $DIR_NIC/ifcfg-$NIC_true
+    sed -i -e "/^NM_CONTROLLED/"d -e /^DEVICE/a\NM_CONTROLLED=no $DIR_NIC/ifcfg-$NIC_true
+    sed -i -e "/^BOOTPROTO/"d -e /^DEVICE/a\BOOTPROTO=none $DIR_NIC/ifcfg-$NIC_true
+     
+    fi
+done
+     rm -rf .tmp.txt
+#    cat >>$DIR_NIC/ifcfg-$BOND<<EOF
+#           
+#               DEVICE=$BOND
+#               ONBOOT=yes
+#               NM_CONTROLLED=no
+#               BOOTPROTO=static
+#               IPADDR=$IP
+#               NETMASK=$NETMASK
+#               GATEWAY=$GATEWAY         
+#EOF
+#或者
+
+        echo    "DEVICE=$BOND
+                ONBOOT=yes
+                NM_CONTROLLED=no
+                BOOTPROTO=static
+                IPADDR=$IP
+                NETMASK=$NETMASK
+                GATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
+
+#
+
+echo " modify modprobe.d/bond.conf"
+echo "##### for bond configure ######" >> /etc/modprobe.d/bond.conf
+echo "alias ${BOND} bonding" >> /etc/modprobe.d/bond.conf
+echo "options ${BOND} miimon=100 ${MODE}" >> /etc/modprobe.d/bond.conf
+}
+network_explain
+echo "全部配置完成，等待重启网卡中。(ok)"
+sleep 3
+service network restart   
