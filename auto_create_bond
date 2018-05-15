@@ -47,18 +47,7 @@ def_network () {
         DIR_NIC=/etc/sysconfig/network-scripts
         if [ $NIC_true == $NIC_true ];then
         cp $DIR_NIC/ifcfg-$NIC_true  $DIR_NIC/ifcfg-$NIC_true.bak
-#       cat /dev/null > $DIR_NIC/ifcfg-$NIC_true
-
-#       cat >> $DIR_NIC/ifcfg-$NIC_true <<EOF
-#           BOOTPROTO=none
-#           TYPE=Ethernet
-#           DEVICE=$NIC_true
-#           ONBOOT=yes
-#           MASTER=$BOND
-#           SLAVE=yes
-#EOF
-####    或者
-    echo "DEVICE=$NIC_true
+        echo "DEVICE=$NIC_true
             MASTER=$BOND
             SLAVE=yes" >> $DIR_NIC/ifcfg-$NIC_true
 #           
