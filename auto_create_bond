@@ -81,13 +81,7 @@ done
 #EOF
 #或者
 
-        echo    "DEVICE=$BOND
-                ONBOOT=yes
-                NM_CONTROLLED=no
-                BOOTPROTO=static
-                IPADDR=$IP
-                NETMASK=$NETMASK
-                GATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
+echo  -e "DEVICE=$BOND\nONBOOT=yes\nNM_CONTROLLED=no\nBOOTPROTO=static\nIPADDR=$IP\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
 
 #
 
