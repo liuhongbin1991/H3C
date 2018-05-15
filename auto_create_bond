@@ -2,7 +2,7 @@
 #***************************************************** 
 #ScriptName:auto_create_bond.sh 
 #Author:liu.hongbin@h3c.com  
-#Create Date:2016-10-09 17:28 
+#renewed Date:2018-05-15 17:28 
 #Fuction:this shell is used to auto create a bond port
 
 #修改系统语言包，将zh_CN.UTF-8 改成 zh_CN.GB18030
