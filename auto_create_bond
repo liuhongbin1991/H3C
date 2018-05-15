@@ -94,7 +94,7 @@ done
 echo " modify modprobe.d/bond.conf"
 echo "##### for bond configure ######" >> /etc/modprobe.d/bond.conf
 echo "alias ${BOND} bonding" >> /etc/modprobe.d/bond.conf
-echo "options ${BOND} miimon=100 ${MODE}" >> /etc/modprobe.d/bond.conf
+echo "options ${BOND} miimon=100 mode=${MODE}" >> /etc/modprobe.d/bond.conf
 }
 def_network
 echo "全部配置完成，等待重启网卡中。(ok)"
