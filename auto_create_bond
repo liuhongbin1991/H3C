@@ -58,19 +58,7 @@ def_network () {
     fi
 done
      rm -rf .tmp.txt
-#    cat >>$DIR_NIC/ifcfg-$BOND<<EOF
-#           
-#               DEVICE=$BOND
-#               ONBOOT=yes
-#               NM_CONTROLLED=no
-#               BOOTPROTO=static
-#               IPADDR=$IP
-#               NETMASK=$NETMASK
-#               GATEWAY=$GATEWAY         
-#EOF
-#或者
-
-      echo  -e "DEVICE=$BOND\nONBOOT=yes\nNM_CONTROLLED=no\nBOOTPROTO=static\nIPADDR=$IP\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
+     echo  -e "DEVICE=$BOND\nONBOOT=yes\nNM_CONTROLLED=no\nBOOTPROTO=static\nIPADDR=$IP\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
 #
 echo " modify modprobe.d/bond.conf"
 echo "##### for bond configure ######" >> /etc/modprobe.d/bond.conf
