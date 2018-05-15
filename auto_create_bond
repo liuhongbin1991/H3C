@@ -6,9 +6,9 @@
 #Fuction:this shell is used to auto create a bond port
 
 #修改系统语言包，将zh_CN.UTF-8 改成 zh_CN.GB18030
-输入命令：如vi  /etc/sysconfig/i18n （注意改好之后必须重启一下系统才行）
-sed -i -e 's/^/#/g' -e 1i\LANG="zh_CN.GB18030" /etc/sysconfig/i18n
-source /etc/sysconfig/i18n
+#输入命令：如vi  /etc/sysconfig/i18n （注意改好之后必须重启一下系统才行）
+#sed -i -e 's/^/#/g' -e 1i\LANG="zh_CN.GB18030" /etc/sysconfig/i18n
+#source /etc/sysconfig/i18n
 echo "####################################################################"
 echo "!!!IF Somethings You Input Wrong  Press ‘ctrl+backspace’ to Delete。!!!"
 echo "####################################################################"
@@ -16,28 +16,28 @@ echo "####################################################################"
 def_bond () {
    echo "#########################################################################"
    echo "
-    mode=0表示load balancing (round-robin)为负载均衡方式，两块网卡都工作。
-    mode=1表示fault-tolerance (active-backup)提供冗余功能，工作方式是主备的工作方式,也就是说默认情况下只有一块网卡工作,另一块做备份.
-    mode=2表示balance-x，提供负载均衡和冗余功能。
-    mode=3表示broadcast，这个模式提供容错性。
-    mode=4表示802.3ad，提供了ethtool的迅速，以及使用了802.3ad模式
-    mode=5表示balance-tlb，自动适应负载均衡，自动切换故障。在此基础上Ethtool支持驱动。
-    mode=6表示在5模式的基础上优化了arp的广播信息。"
+    mode=0 //load balancing (round-robin),both nic active.
+    mode=1 //fault-tolerance (active-backup),only one nic active with a mac.
+    mode=2 //(balance-xor)XOR policy,need switch support.default hash policy is des mac,controlled by xmit_hash_policy.
+    mode=3 //broadcast,every nic send packets,controlled by xmit_hash_policy.
+    mode=4 //802.3ad,LACP.
+    mode=5 //balance-tlb，need support of Ethtool drive.
+    mode=6 //balance-alb,include mode 5."
     echo "###########################################################################"
-    read -p "请你输入一种你要的聚合方式(mode=1)：" MODE 
-    read -p "请问你要创建聚合的名称(bond0):" BOND
-    read -p "请输入你要设置的ip(192.168.0.10)：" IP
-    read -p "请输入你要设置的netmask(255.255.255.0)：" NETMASK
-    read -p " 请输入你要设置的gateway(192.168.0.1)：" GATEWAY
+
+    read -p "please input your bond mode number (e.g.. mode=1):" MODE 
+    read -p "please input your bond name (e.g.. bond0):" BOND
+    read -p "please input your bond ip(eg.. 192.168.0.10):" IP
+    read -p "please input your bond netmask(e.g.. 255.255.255.0):" NETMASK
+    read -p "please input your bond gateway(e.g.. 192.168.0.1):" GATEWAY
 }
 def_bond
 def_network () {
     echo "###############################################"
-    echo "您现阶段可以用的网卡，如下："
-#   echo `ifconfig -a | grep   -i  link | awk  '{print $1}' `
-    echo `ifconfig -a | grep   -i  "Link encap" | awk '{print $1}' `
+    echo "your nic list are below:"
+    echo `ifconfig -a |grep mtu |grep -v br |grep -v lo|grep -v vir|grep -v ovs|awk -F':' '{print $1}'`
     echo "################################################"
-    read -p   "麻烦你选择你要的网卡做聚合(eth0 eth1)："  NIC
+    read -p   "select your bond nic (e.g.. eth0 eth1)："  NIC
     echo $NIC >> .tmp.txt
     NIC_num=`awk '{print NF }' .tmp.txt`
 
@@ -81,16 +81,14 @@ done
 #EOF
 #或者
 
-echo  -e "DEVICE=$BOND\nONBOOT=yes\nNM_CONTROLLED=no\nBOOTPROTO=static\nIPADDR=$IP\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
-
+      echo  -e "DEVICE=$BOND\nONBOOT=yes\nNM_CONTROLLED=no\nBOOTPROTO=static\nIPADDR=$IP\nNETMASK=$NETMASK\nGATEWAY=$GATEWAY" >> $DIR_NIC/ifcfg-$BOND
 #
-
 echo " modify modprobe.d/bond.conf"
 echo "##### for bond configure ######" >> /etc/modprobe.d/bond.conf
 echo "alias ${BOND} bonding" >> /etc/modprobe.d/bond.conf
 echo "options ${BOND} miimon=100 mode=${MODE}" >> /etc/modprobe.d/bond.conf
 }
 def_network
-echo "全部配置完成，等待重启网卡中。(ok)"
+echo "wait for restart..."
 sleep 3
-service network restart   
+service network restart
